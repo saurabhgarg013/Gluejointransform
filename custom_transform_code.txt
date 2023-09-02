@@ -1,0 +1,23 @@
+def MyTransform (glueContext, dfc) -> DynamicFrameCollection:
+    
+    # Convert the input DynamicFrame to a DataFrame
+    df = dfc.select(list(dfc.keys())[0]).toDF()
+    
+    # Create a temporary view for the DataFrame
+    df.createOrReplaceTempView("inputTable")
+    
+    # Apply the transformations using Spark SQL
+    df_transformed = spark.sql("""
+        SELECT UPPER(language) AS language_upper,
+               UPPER(name) AS name_upper,
+               'Y' AS status
+        FROM inputTable
+    """)
+    
+    # Convert the transformed DataFrame to a DynamicFrame
+    dyf_transformed = DynamicFrame.fromDF(df_transformed, glueContext, "result0")
+    
+    # Return the transformed DynamicFrameCollection
+    return DynamicFrameCollection({"CustomTransform0": dyf_transformed}, glueContext)
+    
+    
